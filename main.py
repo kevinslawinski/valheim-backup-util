@@ -12,14 +12,11 @@ def save_config(config):
 
 def print_config(config):
   print('\nCurrent configuration:\n')
-  print(f'World Name: {config.get("world_file_name")}')
-  print(f'Valheim Save Location: {config.get("local_path")}')
-  print(f'Repo Path: {config.get("repo_path")}')
-  print('\n')
+  print(f'  World Name: {config.get("world_file_name")}')
+  print(f'  Valheim Save Location: {config.get("local_path")}')
+  print(f'  Repo Path: {config.get("repo_path")}')
   
 def generate_config():
-  if os.path.exists(USER_CONFIG):
-    print_config(load_config())
   print('\nNew configuration:\n')
   world_file_name = input('  Name of the Valheim world: ')
   local_path = os.path.join(os.getenv('USERPROFILE'), 'AppData', 'LocalLow', 'IronGate', 'Valheim', 'worlds_local')
@@ -75,12 +72,13 @@ def main_menu():
     print('\n\n----------------------')
     print('Valheim Backup Utility')
     print('----------------------')
-    load_config()
+    config = load_config()
     time.sleep(0.7)
     print('\n----------------------')
     print('(1) Upload world files to git repository')
     print('(2) Download world files from git repository')
-    print('(3) Regenerate config')
+    print('(3) Read current config')
+    print('(4) Regenerate config')
     
     choice = input('Choose an option (1-3, 0 to exit): ')
     
@@ -89,6 +87,8 @@ def main_menu():
     elif choice == '2':
       download_files()
     elif choice == '3':
+      print_config(config)
+    elif choice == '4':
       generate_config()
     elif choice == '0':
       print('Goodbye!')
