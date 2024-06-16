@@ -47,12 +47,27 @@ def upload_files():
         return True
       else:
         print(f'Could not find .db or .fwl file matching specified world name "{world_file}".')
-    
+
 def download_files():
-  print('Not yet implemented')
+  with open(USER_CONFIG, 'r') as c:
+    config = json.load(c)
+    world_file = config.get('world_file_name')
+    local_path = config.get('local_path')
+    repo_path = config.get('repo_path')
+    for item in os.listdir(repo_path):
+      if world_file in item:
+        db_file = f'{world_file}.db'
+        fwl_file = f'{world_file}.fwl'
+        shutil.copy2(os.path.join(repo_path, db_file), os.path.join(local_path, db_file))
+        shutil.copy2(os.path.join(repo_path, fwl_file), os.path.join(local_path, fwl_file))
+        print('World files downloaded successfully. Navigating to main menu...')
+        return True
+      else:
+        print(f'Could not find .db or .fwl file matching specified world name "{world_file}".')
 
 def main():
   while True:
+    print('\n\n----------------------')
     print('Valheim Backup Utility')
     print('----------------------')
     load_config(USER_CONFIG)
@@ -66,10 +81,13 @@ def main():
     
     if choice == '1':
       upload_files()
+      time.sleep(2)
     elif choice == '2':
       download_files()
+      time.sleep(2)
     elif choice == '3':
       generate_config()
+      time.sleep(2)
     elif choice == '0':
       print('Goodbye!')
       break
