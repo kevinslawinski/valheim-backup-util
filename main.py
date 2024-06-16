@@ -23,7 +23,7 @@ def generate_config():
   save_config(config)
   return config
 
-def load_config(USER_CONFIG):
+def load_config():
   print('Loading config file...')
   if not os.path.exists(USER_CONFIG):
     print('Config file not found')
@@ -44,32 +44,31 @@ def copy_files(src, dst, files):
     except Exception as e:
       print(f'Error copying file {src_file}: {e}')
 
-def upload_files():
+def sync_files(action):
   with open(USER_CONFIG, 'r') as c:
     config = json.load(c)
     world_file = config.get('world_file_name')
     local_path = config.get('local_path')
     repo_path = config.get('repo_path')
     files = [f'{world_file}.db', f'{world_file}.fwl']
-    copy_files(local_path, repo_path, files)
+    if action == 'upload':
+      copy_files(local_path, repo_path, files)
+    elif action == 'download':
+      copy_files(repo_path, local_path, files)
     print('Navigating to main menu...')
+
+def upload_files():
+  sync_files('upload')
 
 def download_files():
-  with open(USER_CONFIG, 'r') as c:
-    config = json.load(c)
-    world_file = config.get('world_file_name')
-    local_path = config.get('local_path')
-    repo_path = config.get('repo_path')
-    files = [f'{world_file}.db', f'{world_file}.fwl']
-    copy_files(repo_path, local_path, files)
-    print('Navigating to main menu...')
+  sync_files('download')
 
-def main():
+def main_menu():
   while True:
     print('\n\n----------------------')
     print('Valheim Backup Utility')
     print('----------------------')
-    load_config(USER_CONFIG)
+    load_config()
     time.sleep(2)
     print('\n----------------------')
     print('(1) Upload world files to git repository')
@@ -80,19 +79,18 @@ def main():
     
     if choice == '1':
       upload_files()
-      time.sleep(2)
     elif choice == '2':
       download_files()
-      time.sleep(2)
     elif choice == '3':
       generate_config()
-      time.sleep(2)
     elif choice == '0':
       print('Goodbye!')
       break
     else:
       print('Not an option. Try again.')
+    time.sleep(2)
 
-main()
+if __name__ == '__main__':
+  main_menu()
     
 # os.system('git pull')
