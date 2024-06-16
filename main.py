@@ -11,10 +11,17 @@ def save_config(config):
     json.dump(config, config_file, indent=2)
     
 def generate_config():
+  if os.path.exists(USER_CONFIG):
+    config = load_config()
+    print('\nCurrent configuration:\n')
+    print(f'World Name: {config.get("world_file_name")}')
+    print(f'Valheim Save Location: {config.get("local_path")}')
+    print(f'Repo Path: {config.get("repo_path")}')
+    print('\n')
   print('Generating new config...\n')
   world_file_name = input('Name of the Valheim world: ')
   local_path = os.path.join(os.getenv('USERPROFILE'), 'AppData', 'LocalLow', 'IronGate', 'Valheim', 'worlds_local')
-  repo_path = input('Local path to Valiheim remote repository: ')
+  repo_path = input('Path to Valiheim remote repository: ')
   config = {
     'world_file_name': world_file_name,
     'local_path': local_path,
@@ -29,7 +36,6 @@ def load_config():
     print('Config file not found')
     return generate_config()
   with open(USER_CONFIG, 'r') as config:
-    print('Config file loaded successfully. Navigating to main menu...')
     return json.load(config)
 
 def copy_files(src, dst, files):
@@ -45,17 +51,16 @@ def copy_files(src, dst, files):
       print(f'Error copying file {src_file}: {e}')
 
 def sync_files(action):
-  with open(USER_CONFIG, 'r') as c:
-    config = json.load(c)
-    world_file = config.get('world_file_name')
-    local_path = config.get('local_path')
-    repo_path = config.get('repo_path')
-    files = [f'{world_file}.db', f'{world_file}.fwl']
-    if action == 'upload':
-      copy_files(local_path, repo_path, files)
-    elif action == 'download':
-      copy_files(repo_path, local_path, files)
-    print('Navigating to main menu...')
+  config = load_config()
+  world_file = config.get('world_file_name')
+  local_path = config.get('local_path')
+  repo_path = config.get('repo_path')
+  files = [f'{world_file}.db', f'{world_file}.fwl']
+  if action == 'upload':
+    copy_files(local_path, repo_path, files)
+  elif action == 'download':
+    copy_files(repo_path, local_path, files)
+  print('Navigating to main menu...')
 
 def upload_files():
   sync_files('upload')
@@ -69,7 +74,7 @@ def main_menu():
     print('Valheim Backup Utility')
     print('----------------------')
     load_config()
-    time.sleep(2)
+    time.sleep(0.7)
     print('\n----------------------')
     print('(1) Upload world files to git repository')
     print('(2) Download world files from git repository')
