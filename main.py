@@ -32,21 +32,27 @@ def load_config(USER_CONFIG):
     print('Config file loaded successfully. Navigating to main menu...')
     return json.load(config)
 
+def copy_files(src, dst, files):
+  for file in files:
+    src_file = os.path.join(src, file)
+    dst_file = os.path.join(dst, file)
+    try:
+      shutil.copy2(src_file, dst_file)
+      print(f'Copied file: {file}')
+    except FileNotFoundError:
+      print(f'File not found: {src_file}')
+    except Exception as e:
+      print(f'Error copying file {src_file}: {e}')
+
 def upload_files():
   with open(USER_CONFIG, 'r') as c:
     config = json.load(c)
     world_file = config.get('world_file_name')
     local_path = config.get('local_path')
     repo_path = config.get('repo_path')
-    for item in os.listdir(local_path):
-      if world_file in item:
-        db_file = f'{world_file}.db'
-        fwl_file = f'{world_file}.fwl'
-        shutil.copy2(os.path.join(local_path, db_file), os.path.join(repo_path, db_file))
-        shutil.copy2(os.path.join(local_path, fwl_file), os.path.join(repo_path, fwl_file))
-        return True
-      else:
-        print(f'Could not find .db or .fwl file matching specified world name "{world_file}".')
+    files = [f'{world_file}.db', f'{world_file}.fwl']
+    copy_files(local_path, repo_path, files)
+    print('Navigating to main menu...')
 
 def download_files():
   with open(USER_CONFIG, 'r') as c:
@@ -54,16 +60,9 @@ def download_files():
     world_file = config.get('world_file_name')
     local_path = config.get('local_path')
     repo_path = config.get('repo_path')
-    for item in os.listdir(repo_path):
-      if world_file in item:
-        db_file = f'{world_file}.db'
-        fwl_file = f'{world_file}.fwl'
-        shutil.copy2(os.path.join(repo_path, db_file), os.path.join(local_path, db_file))
-        shutil.copy2(os.path.join(repo_path, fwl_file), os.path.join(local_path, fwl_file))
-        print('World files downloaded successfully. Navigating to main menu...')
-        return True
-      else:
-        print(f'Could not find .db or .fwl file matching specified world name "{world_file}".')
+    files = [f'{world_file}.db', f'{world_file}.fwl']
+    copy_files(repo_path, local_path, files)
+    print('Navigating to main menu...')
 
 def main():
   while True:
