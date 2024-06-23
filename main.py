@@ -1,22 +1,6 @@
 import time
-
-def sync_files(action):
-  config = load_config()
-  world_file = config.get('world_file_name')
-  local_path = config.get('local_path')
-  repo_path = config.get('repo_path')
-  files = [f'{world_file}.db', f'{world_file}.fwl']
-  if action == 'upload':
-    copy_files(local_path, repo_path, files)
-  elif action == 'download':
-    copy_files(repo_path, local_path, files)
-  print('Navigating to main menu...')
-
-def upload_files():
-  sync_files('upload')
-
-def download_files():
-  sync_files('download')
+from ConfigManager import ConfigManager
+from FileManager import FileManager
 
 def main_menu():
   while True:
