@@ -1,6 +1,5 @@
 import os
 import shutil
-
 from ConfigManager import ConfigManager
 
 class FileManager:
