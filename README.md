@@ -1,3 +1,6 @@
+## How to run
+* Double-click `run.bat`, have fun
+
 ## Things to know
 * Currently only supports Windows
 * You should have Valheim installed already. This was tested with an install via Steam.
