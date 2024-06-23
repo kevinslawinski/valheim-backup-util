@@ -24,7 +24,15 @@ class FileManager:
     repo_path = config.get('repo_path')
     files = [f'{world_file}.db', f'{world_file}.fwl']
     if action == 'upload':
-      FileManager.copy_files(local_path, repo_path, files)
+      confirm = input(f'End of session upload. Confirm: (y/n) ')
+      if confirm.lower() == 'y':
+        FileManager.copy_files(local_path, repo_path, files)
+      else:
+        print('Nothing uploaded.')
     elif action == 'download':
-      FileManager.copy_files(repo_path, local_path, files)
+      confirm = input(f'Start of session download. Confirm: (y/n) ')
+      if confirm.lower() == 'y':
+        FileManager.copy_files(repo_path, local_path, files)
+      else:
+        print('Nothing downloaded.')
     print('Navigating to main menu...')
