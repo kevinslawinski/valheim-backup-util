@@ -7,7 +7,7 @@ def main_menu():
     print('\n\n----------------------')
     print('Valheim Backup Utility')
     print('----------------------')
-    config = load_config()
+    config = ConfigManager.load_config()
     time.sleep(0.7)
     print('\n----------------------')
     print('(1) Upload world files to git repository')
@@ -18,13 +18,13 @@ def main_menu():
     choice = input('Choose an option (1-3, 0 to exit): ')
     
     if choice == '1':
-      upload_files()
+      FileManager.sync_files('upload')
     elif choice == '2':
-      download_files()
+      FileManager.sync_files('download')
     elif choice == '3':
-      print_config(config)
+      ConfigManager.print_config(config)
     elif choice == '4':
-      generate_config()
+      ConfigManager.generate_config()
     elif choice == '0':
       print('Goodbye!')
       break
