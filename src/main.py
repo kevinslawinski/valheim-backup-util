@@ -9,8 +9,10 @@ class App:
       print('\n----------------------')
       print('Valheim Backup Utility')
       print('----------------------')
-      config = ConfigManager.load_config()
+      configManager = ConfigManager()
+      configManager.load_config()
       time.sleep(0.5)
+      
       print('\n----------------------')
       print('(1) Upload world files to git repository')
       print('(2) Download world files from git repository')
@@ -24,9 +26,9 @@ class App:
       elif choice == '2':
         FileManager.sync_files('download')
       elif choice == '3':
-        ConfigManager.print_config(config)
+        configManager.print_config()
       elif choice == '4':
-        ConfigManager.generate_config()
+        configManager.generate_config()
       elif choice == '0':
         print('Goodbye!')
         break

@@ -1,24 +1,21 @@
 import json
 import os
 
-# file name of user configuration
-USER_CONFIG = 'config.json'
-
 class ConfigManager:
-  @staticmethod
-  def save_config(config):
-    with open(USER_CONFIG, 'w') as config_file:
+  USER_CONFIG = 'config.json'
+    
+  def save_config(self, config):
+    with open(self.USER_CONFIG, 'w') as config_file:
       json.dump(config, config_file, indent=2)
 
-  @staticmethod
-  def print_config(config):
+  def print_config(self):
+    config = self.load_config()
     print('\nCurrent configuration:\n')
     print(f'  World Name: {config.get("world_file_name")}')
     print(f'  Valheim Save Location: {config.get("local_path")}')
     print(f'  Repo Path: {config.get("repo_path")}')
 
-  @staticmethod
-  def generate_config():
+  def generate_config(self):
     print('\nNew configuration:\n')
     world_file_name = input('  Name of the Valheim world: ')
     local_path = os.path.join(os.getenv('USERPROFILE'), 'AppData', 'LocalLow', 'IronGate', 'Valheim', 'worlds_local')
@@ -28,14 +25,14 @@ class ConfigManager:
       'local_path': local_path,
       'repo_path': repo_path
     }
-    ConfigManager.save_config(config)
+    self.save_config(config)
     return config
 
-  @staticmethod
-  def load_config():
+  def load_config(self):
     print('Loading config file...')
-    if not os.path.exists(USER_CONFIG):
+    if not os.path.exists(self.USER_CONFIG):
       print('Config file not found.')
-      return ConfigManager.generate_config()
-    with open(USER_CONFIG, 'r') as config:
+      return self.generate_config()
+    
+    with open(self.USER_CONFIG, 'r') as config:
       return json.load(config)
