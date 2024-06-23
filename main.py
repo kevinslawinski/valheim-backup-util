@@ -4,11 +4,11 @@ from FileManager import FileManager
 
 def main_menu():
   while True:
-    print('\n\n----------------------')
+    print('\n----------------------')
     print('Valheim Backup Utility')
     print('----------------------')
     config = ConfigManager.load_config()
-    time.sleep(0.7)
+    time.sleep(0.5)
     print('\n----------------------')
     print('(1) Upload world files to git repository')
     print('(2) Download world files from git repository')
