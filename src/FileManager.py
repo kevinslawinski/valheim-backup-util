@@ -18,7 +18,8 @@ class FileManager:
     
   @staticmethod
   def sync_files(action):
-    config = ConfigManager.load_config()
+    configManager = ConfigManager()
+    config = configManager.load_config()
     world_file = config.get('world_file_name')
     local_path = config.get('local_path')
     repo_path = config.get('repo_path')
