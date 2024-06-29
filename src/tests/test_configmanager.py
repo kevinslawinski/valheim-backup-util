@@ -56,7 +56,8 @@ class TestConfigManager(unittest.TestCase):
         self.assertEqual(saved_config, test_config)
 
     @patch('builtins.input', side_effect=['TestWorld', 'C:\\Users\\TestUser\\ValheimRepo'])
-    def test_generate_config(self, mock_input):
+    @patch('os.getenv', return_value='C:\\Users\\TestUser')
+    def test_generate_config(self, mock_input, mock_getenv):
         config_manager = ConfigManager()
         generated_config = config_manager.generate_config()
 
