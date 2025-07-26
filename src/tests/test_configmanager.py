@@ -132,7 +132,7 @@ class TestConfigManager(unittest.TestCase):
                 sut = ConfigManager()
                 with self.assertRaises(ValueError) as cm:
                     sut.load_config()
-                self.assertIn(f"Config missing required fields: {{{repr(field)}}}", str(cm.exception))
+                self.assertIn(f"Config missing required fields: {{{field!r}}}", str(cm.exception))
 
     def test_config_load_corrupt_configs_fail(self):
         """Test that corrupt configs (extra fields, empty/null values) are considered invalid."""
