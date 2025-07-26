@@ -23,7 +23,7 @@ class TestConfigManager(unittest.TestCase):
         self.temp_config_file = self.tempfile.name
         self.tempfile.close()
         # Patch USER_CONFIG to use the temp file
-        self.patcher = patch('src.ConfigManager.ConfigManager.USER_CONFIG', self.temp_config_file)
+        self.patcher = patch.object(ConfigManager, 'USER_CONFIG', self.temp_config_file)
         self.patcher.start()
         # Write the shared sample config to the temp file
         with open(self.temp_config_file, 'w') as f:
