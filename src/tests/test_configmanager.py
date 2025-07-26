@@ -46,9 +46,8 @@ class TestConfigManager(unittest.TestCase):
             'repo_path': 'D:\\Backups\\ValheimRepo'
         }
         sut.save_config(new_config)
-
-        # Check that open was called with the correct file and mode
-        mock_open.assert_called_with(sut.USER_CONFIG, 'w')
+        # Check that open was called with the correct file, mode, and encoding
+        mock_open.assert_called_with(sut.USER_CONFIG, 'w', encoding='utf-8')
         # Use the actual file handle from the mock
         handle = mock_open.return_value
         handle.write.assert_called()
@@ -119,8 +118,8 @@ class TestConfigManager(unittest.TestCase):
         with open(self.temp_config_file, 'w') as f:
             json.dump(incomplete_config, f)
         sut = ConfigManager()
-        loaded = sut.load_config()
-        self.assertNotIn('repo_path', loaded)
+        with self.assertRaises(ValueError):
+            sut.load_config()
 
     def test_config_load_empty_file(self):
         """Test loading a config file that exists but is empty."""
@@ -153,6 +152,39 @@ class TestConfigManager(unittest.TestCase):
                 mocked_print.assert_any_call('\nCurrent configuration:\n')
                 for expected_line in expected_output:
                     mocked_print.assert_any_call(expected_line)
+
+    def test_config_load_extra_fields_fails(self):
+        """Test that config with extra/unexpected fields is considered corrupt."""
+        config_with_extra = self.sample_config.copy()
+        config_with_extra['unexpected_field'] = 'extra_value'
+        with open(self.temp_config_file, 'w') as f:
+            json.dump(config_with_extra, f)
+        sut = ConfigManager()
+        with self.assertRaises(Exception):
+            sut.load_config()
+
+    def test_config_load_non_ascii_success(self):
+        """Test loading a config file with non-ASCII/special characters."""
+        config_with_unicode = self.sample_config.copy()
+        config_with_unicode['world_file_name'] = '世界'
+        config_with_unicode['repo_path'] = 'D:/Backups/ヴァルハイム'
+        with open(self.temp_config_file, 'w', encoding='utf-8') as f:
+            json.dump(config_with_unicode, f, ensure_ascii=False)
+        sut = ConfigManager()
+        loaded = sut.load_config()
+        self.assertEqual(loaded['world_file_name'], '世界')
+        self.assertEqual(loaded['repo_path'], 'D:/Backups/ヴァルハイム')
+
+    def test_config_load_empty_null_values_fails(self):
+        """Test that config with empty/null values is considered corrupt."""
+        config_with_empty = self.sample_config.copy()
+        config_with_empty['world_file_name'] = ''
+        config_with_empty['repo_path'] = None
+        with open(self.temp_config_file, 'w') as f:
+            json.dump(config_with_empty, f)
+        sut = ConfigManager()
+        with self.assertRaises(Exception):
+            sut.load_config()
 
 if __name__ == '__main__':
     unittest.main()

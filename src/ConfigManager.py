@@ -6,8 +6,8 @@ class ConfigManager:
     
   def save_config(self, config):
     try:
-      with open(self.USER_CONFIG, 'w') as config_file:
-        json.dump(config, config_file, indent=2)
+      with open(self.USER_CONFIG, 'w', encoding='utf-8') as config_file:
+        json.dump(config, config_file, indent=2, ensure_ascii=False)
     except PermissionError as e:
       print(f"Permission denied when saving config: {e}")
       raise
@@ -41,8 +41,24 @@ class ConfigManager:
       print('Config file not found.')
       return self.generate_config()
     try:
-      with open(self.USER_CONFIG, 'r') as config:
-        return json.load(config)
+      with open(self.USER_CONFIG, 'r', encoding='utf-8') as config_file:
+        config = json.load(config_file)
+        # Validation logic
+        required_fields = {'world_file_name', 'local_path', 'repo_path'}
+        config_keys = set(config.keys())
+        # Check for missing fields
+        missing = required_fields - config_keys
+        if missing:
+          raise ValueError(f"Config missing required fields: {missing}")
+        # Check for extra fields
+        extra = config_keys - required_fields
+        if extra:
+          raise ValueError(f"Config has unexpected fields: {extra}")
+        # Check for empty or null values
+        for field in required_fields:
+          if config[field] is None or config[field] == '':
+            raise ValueError(f"Config field '{field}' is empty or null.")
+        return config
     except json.JSONDecodeError as e:
       print(f"Config file is not valid JSON: {e}")
       raise
