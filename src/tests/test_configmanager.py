@@ -4,26 +4,14 @@ import os
 from unittest import mock
 from unittest.mock import mock_open, patch
 
-# Import the ConfigManager class from your module
 from src.ConfigManager import ConfigManager
 
-# Define a temporary file path for testing
-# TEST_CONFIG_FILE = 'test_config.json'
-
-
-
-
-
-# TESTS PASS BUT THEY ARE OVERWRITING THE ACTUAL CONFIG FILE
-
-
-
-
-
 class TestConfigManager(unittest.TestCase):
-
     def setUp(self):
-        # Create a sample config file for testing
+        # Patch USER_CONFIG to use a temp file for all tests
+        self.patcher = patch('src.ConfigManager.ConfigManager.USER_CONFIG', 'temp_config.json')
+        self.patcher.start()
+        # Create sample config data for testing
         self.sample_config = {
             'world_file_name': 'TestWorld',
             'local_path': 'C:\\Users\\TestUser\\AppData\\LocalLow\\IronGate\\Valheim\\worlds_local',
@@ -37,6 +25,7 @@ class TestConfigManager(unittest.TestCase):
         # Remove the temporary config file after each test
         if os.path.exists(self.temp_config_file):
             os.remove(self.temp_config_file)
+        self.patcher.stop()
 
     def test_save_config(self):
         config_manager = ConfigManager()
