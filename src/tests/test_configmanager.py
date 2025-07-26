@@ -55,14 +55,6 @@ class TestConfigManager(unittest.TestCase):
         saved_config = json.loads(written_data)
         self.assertEqual(saved_config, new_config)
         
-    def test_config_save_permission_error(self):
-        """Test saving config when a permission error occurs."""
-        sut = ConfigManager()
-        test_config = self.sample_config.copy()
-        with patch('builtins.open', side_effect=PermissionError):
-            with self.assertRaises(PermissionError):
-                sut.save_config(test_config)
-
     @patch('os.getenv', return_value='C:\\Users\\TestUser')
     def test_config_generate_success(self, mock_os_getenv):
         """Test generating a config via user input and environment."""
@@ -114,54 +106,46 @@ class TestConfigManager(unittest.TestCase):
             mock_generate.assert_called_once()
             self.assertEqual(loaded_config, self.sample_config)
 
-    def test_config_load_invalid_json(self):
-        """Test loading a config file with invalid/corrupted JSON."""
-        with open(self.temp_config_file, 'w') as f:
-            f.write('{invalid json}')
-        sut = ConfigManager()
-        with self.assertRaises(json.JSONDecodeError):
-            sut.load_config()
+    def test_config_load_invalid_json_and_empty_file(self):
+        """Test loading a config file with invalid/corrupted JSON or empty file raises JSONDecodeError."""
+        cases = [
+            ('{invalid json}', 'invalid json'),
+            ('', 'empty file'),
+        ]
+        for file_content, case in cases:
+            with self.subTest(case=case):
+                with open(self.temp_config_file, 'w') as f:
+                    f.write(file_content)
+                sut = ConfigManager()
+                with self.assertRaises(json.JSONDecodeError):
+                    sut.load_config()
 
     def test_config_load_missing_fields(self):
         """Test loading a config file missing required fields."""
-        # Use a copy of sample_config and remove 'repo_path'
-        incomplete_config = self.sample_config.copy()
-        incomplete_config.pop('repo_path')
-        with open(self.temp_config_file, 'w') as f:
-            json.dump(incomplete_config, f)
-        sut = ConfigManager()
-        with self.assertRaises(ValueError):
-            sut.load_config()
+        required_fields = ['world_file_name', 'local_path', 'repo_path']
+        for field in required_fields:
+            with self.subTest(missing_field=field):
+                incomplete_config = self.sample_config.copy()
+                incomplete_config.pop(field)
+                with open(self.temp_config_file, 'w') as f:
+                    json.dump(incomplete_config, f)
+                sut = ConfigManager()
+                with self.assertRaises(ValueError):
+                    sut.load_config()
 
-    def test_config_load_empty_file(self):
-        """Test loading a config file that exists but is empty."""
-        # Write an empty file
-        with open(self.temp_config_file, 'w') as f:
-            f.write('')
+    def test_config_save_permission_errors(self):
+        """Test saving config when file-related errors occur."""
+        error_cases = [
+            (PermissionError, 'PermissionError'),
+            (OSError, 'OSError'),
+        ]
         sut = ConfigManager()
-        with self.assertRaises(json.JSONDecodeError):
-            sut.load_config()
-
-    def test_config_load_extra_fields_fails(self):
-        """Test that config with extra/unexpected fields is considered corrupt."""
-        config_with_extra = self.sample_config.copy()
-        config_with_extra['unexpected_field'] = 'extra_value'
-        with open(self.temp_config_file, 'w') as f:
-            json.dump(config_with_extra, f)
-        sut = ConfigManager()
-        with self.assertRaises(ValueError):
-            sut.load_config()
-
-    def test_config_load_empty_null_values_fails(self):
-        """Test that config with empty/null values is considered corrupt."""
-        config_with_empty = self.sample_config.copy()
-        config_with_empty['world_file_name'] = ''
-        config_with_empty['repo_path'] = None
-        with open(self.temp_config_file, 'w') as f:
-            json.dump(config_with_empty, f)
-        sut = ConfigManager()
-        with self.assertRaises(ValueError):
-            sut.load_config()
+        test_config = self.sample_config.copy()
+        for error, case in error_cases:
+            with self.subTest(error=case):
+                with patch('builtins.open', side_effect=error):
+                    with self.assertRaises(error):
+                        sut.save_config(test_config)
 
     @patch('os.path.exists', return_value=True)
     @patch('builtins.open', new_callable=mock_open)
