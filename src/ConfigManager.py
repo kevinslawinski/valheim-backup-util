@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 class ConfigManager:
@@ -64,11 +65,11 @@ class ConfigManager:
             raise ValueError(f"Config field '{field}' is empty or null.")
         return config
     except json.JSONDecodeError as e:
-      print(f"Config file is not valid JSON: {e}")
+      logging.error(f"Config file is not valid JSON: {e}")
       raise
     except PermissionError as e:
-      print(f"Permission denied when loading config: {e}")
+      logging.error(f"Permission denied when loading config: {e}")
       raise
     except Exception as e:
-      print(f"Unexpected error when loading config: {e}")
+      logging.error(f"Unexpected error when loading config: {e}")
       raise
