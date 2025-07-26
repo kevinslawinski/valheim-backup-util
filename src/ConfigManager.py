@@ -10,10 +10,10 @@ class ConfigManager:
       with open(self.USER_CONFIG, 'w', encoding='utf-8') as config_file:
         json.dump(config, config_file, indent=2, ensure_ascii=False)
     except PermissionError as e:
-      print(f"Permission denied when saving config: {e}")
+      logging.error(f"Permission denied when saving config: {e}")
       raise
     except Exception as e:
-      print(f"Unexpected error when saving config: {e}")
+      logging.error(f"Unexpected error when saving config: {e}")
       raise
 
   def print_config(self):
