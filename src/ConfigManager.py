@@ -5,8 +5,15 @@ class ConfigManager:
   USER_CONFIG = 'config.json'
     
   def save_config(self, config):
-    with open(self.USER_CONFIG, 'w') as config_file:
-      json.dump(config, config_file, indent=2)
+    try:
+      with open(self.USER_CONFIG, 'w') as config_file:
+        json.dump(config, config_file, indent=2)
+    except PermissionError as e:
+      print(f"Permission denied when saving config: {e}")
+      raise
+    except Exception as e:
+      print(f"Unexpected error when saving config: {e}")
+      raise
 
   def print_config(self):
     config = self.load_config()
@@ -33,6 +40,15 @@ class ConfigManager:
     if not os.path.exists(self.USER_CONFIG):
       print('Config file not found.')
       return self.generate_config()
-    
-    with open(self.USER_CONFIG, 'r') as config:
-      return json.load(config)
+    try:
+      with open(self.USER_CONFIG, 'r') as config:
+        return json.load(config)
+    except json.JSONDecodeError as e:
+      print(f"Config file is not valid JSON: {e}")
+      raise
+    except PermissionError as e:
+      print(f"Permission denied when loading config: {e}")
+      raise
+    except Exception as e:
+      print(f"Unexpected error when loading config: {e}")
+      raise

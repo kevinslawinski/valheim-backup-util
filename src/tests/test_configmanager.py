@@ -149,5 +149,17 @@ class TestConfigManager(unittest.TestCase):
         # Check that missing fields are actually missing
         self.assertNotIn('repo_path', loaded)
 
+    def test_save_config_permission_error(self):
+        """Test saving config when a permission error occurs."""
+        config_manager = ConfigManager()
+        test_config = {
+            'world_file_name': 'TestWorld',
+            'local_path': 'C:/' ,
+            'repo_path': 'C:/repo'
+        }
+        with patch('builtins.open', side_effect=PermissionError):
+            with self.assertRaises(PermissionError):
+                config_manager.save_config(test_config)
+
 if __name__ == '__main__':
     unittest.main()
