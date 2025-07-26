@@ -1,6 +1,7 @@
 import unittest
 import json
 import os
+import tempfile
 from unittest import mock
 from unittest.mock import mock_open, patch
 
@@ -8,8 +9,12 @@ from src.ConfigManager import ConfigManager
 
 class TestConfigManager(unittest.TestCase):
     def setUp(self):
-        # Patch USER_CONFIG to use a temp file for all tests
-        self.patcher = patch('src.ConfigManager.ConfigManager.USER_CONFIG', 'temp_config.json')
+        # Create a unique temp file for each test
+        self.tempfile = tempfile.NamedTemporaryFile(delete=False)
+        self.temp_config_file = self.tempfile.name
+        self.tempfile.close()
+        # Patch USER_CONFIG to use the temp file
+        self.patcher = patch('src.ConfigManager.ConfigManager.USER_CONFIG', self.temp_config_file)
         self.patcher.start()
         # Create sample config data for testing
         self.sample_config = {
@@ -17,7 +22,6 @@ class TestConfigManager(unittest.TestCase):
             'local_path': 'C:\\Users\\TestUser\\AppData\\LocalLow\\IronGate\\Valheim\\worlds_local',
             'repo_path': 'C:\\Users\\TestUser\\ValheimRepo'
         }
-        self.temp_config_file = 'temp_config.json'
         with open(self.temp_config_file, 'w') as f:
             json.dump(self.sample_config, f)
 
@@ -59,7 +63,6 @@ class TestConfigManager(unittest.TestCase):
         self.assertEqual(saved_config['world_file_name'], 'TestWorld')
         self.assertEqual(saved_config['repo_path'], 'C:\\Users\\TestUser\\ValheimRepo')
 
-    @patch('src.ConfigManager.ConfigManager.USER_CONFIG', 'temp_config.json')
     def test_load_config_existing(self):
         config_manager = ConfigManager()
 
@@ -97,7 +100,6 @@ class TestConfigManager(unittest.TestCase):
         self.assertEqual(loaded_config['local_path'], 'D:\\ValheimBackups')
         self.assertEqual(loaded_config['repo_path'], 'C:\\Users\\TestUser\\ValheimRepo')
 
-    @patch('src.ConfigManager.ConfigManager.USER_CONFIG', 'temp_config.json')
     @patch('os.path.exists', return_value=True)
     @patch('builtins.open', mock_open(read_data=json.dumps({
         'world_file_name': 'TestWorld',
@@ -119,7 +121,6 @@ class TestConfigManager(unittest.TestCase):
             mocked_print.assert_any_call('\nCurrent configuration:\n')
             for expected_line in expected_output:
                 mocked_print.assert_any_call(expected_line)
-
 
 if __name__ == '__main__':
     unittest.main()
