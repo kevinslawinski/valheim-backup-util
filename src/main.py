@@ -1,6 +1,7 @@
 import time
 from ConfigManager import ConfigManager
 from FileManager import FileManager
+import os
 
 class App:
   @staticmethod
@@ -11,9 +12,11 @@ class App:
       print('----------------------')
       configManager = ConfigManager()
       configManager.load_config()
-      time.sleep(0.5)
-      
-      print('\n----------------------')
+      time.sleep(2)
+      os.system('cls' if os.name == 'nt' else 'clear')
+      print('\n\n----------------------')
+      print('Valheim Backup Utility')
+      print('----------------------')
       print('(1) Upload world files to git repository')
       print('(2) Download world files from git repository')
       print('(3) Read current config')
