@@ -13,7 +13,7 @@ class App:
       configManager = ConfigManager()
       configManager.load_config()
       time.sleep(2)
-      subprocess.run(['cls'] if os.name == 'nt' else ['clear'])
+      os.system('cls' if os.name == 'nt' else 'clear')
       print('\n\n----------------------')
       print('Valheim Backup Utility')
       print('----------------------')
