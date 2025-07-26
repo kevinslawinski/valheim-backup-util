@@ -130,8 +130,37 @@ class TestConfigManager(unittest.TestCase):
                 with open(self.temp_config_file, 'w') as f:
                     json.dump(incomplete_config, f)
                 sut = ConfigManager()
-                with self.assertRaises(ValueError):
+                with self.assertRaises(ValueError) as cm:
                     sut.load_config()
+                self.assertIn(f"Config missing required fields: {{{repr(field)}}}", str(cm.exception))
+
+    def test_config_load_corrupt_configs_fail(self):
+        """Test that corrupt configs (extra fields, empty/null values) are considered invalid."""
+        corrupt_cases = [
+            # Extra/unexpected field
+            ({**self.sample_config, 'unexpected_field': 'extra_value'}, 'extra field', "Config has unexpected fields: {'unexpected_field'}"),
+            # Empty value
+            ({**self.sample_config, 'world_file_name': ''}, 'empty value', "Config field 'world_file_name' is empty or null."),
+            # Null value
+            ({**self.sample_config, 'repo_path': None}, 'null value', "Config field 'repo_path' is empty or null."),
+            # Multiple corruptions
+            ({**self.sample_config, 'world_file_name': '', 'repo_path': None}, 'multiple corruptions', None),
+        ]
+        for config, case, expected_msg in corrupt_cases:
+            with self.subTest(case=case):
+                with open(self.temp_config_file, 'w') as f:
+                    json.dump(config, f)
+                sut = ConfigManager()
+                with self.assertRaises(ValueError) as cm:
+                    sut.load_config()
+                if expected_msg:
+                    self.assertIn(expected_msg, str(cm.exception))
+                else:
+                    # For multiple corruptions, just check it's one of the expected messages
+                    self.assertTrue(
+                        "Config field 'world_file_name' is empty or null." in str(cm.exception) or
+                        "Config field 'repo_path' is empty or null." in str(cm.exception)
+                    )
 
     def test_config_save_permission_errors(self):
         """Test saving config when file-related errors occur."""
@@ -169,6 +198,22 @@ class TestConfigManager(unittest.TestCase):
                 mocked_print.assert_any_call('\nCurrent configuration:\n')
                 for expected_line in expected_output:
                     mocked_print.assert_any_call(expected_line)
+
+    def test_config_load_when_path_is_directory(self):
+        """Test loading config when the config path is a directory, not a file."""
+        # Remove temp file and create a directory at the same path
+        if os.path.exists(self.temp_config_file):
+            os.remove(self.temp_config_file)
+        os.mkdir(self.temp_config_file)
+        try:
+            sut = ConfigManager()
+            with self.assertRaises(ValueError) as cm:
+                sut.load_config()
+            self.assertEqual(str(cm.exception), 'Config path is a directory, not a file.')
+        finally:
+            # Clean up the directory
+            if os.path.isdir(self.temp_config_file):
+                os.rmdir(self.temp_config_file)
 
 if __name__ == '__main__':
     unittest.main()

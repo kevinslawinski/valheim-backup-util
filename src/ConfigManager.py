@@ -41,6 +41,9 @@ class ConfigManager:
       print('Config file not found.')
       new_config = self.generate_config()
       return new_config
+    # Check if the config path is a directory
+    if os.path.isdir(self.USER_CONFIG):
+      raise ValueError('Config path is a directory, not a file.')
     try:
       with open(self.USER_CONFIG, 'r', encoding='utf-8') as config_file:
         config = json.load(config_file)
