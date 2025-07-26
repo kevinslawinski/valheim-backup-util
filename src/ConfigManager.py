@@ -39,7 +39,8 @@ class ConfigManager:
     print('Loading config file...')
     if not os.path.exists(self.USER_CONFIG):
       print('Config file not found.')
-      return self.generate_config()
+      new_config = self.generate_config()
+      return new_config
     try:
       with open(self.USER_CONFIG, 'r', encoding='utf-8') as config_file:
         config = json.load(config_file)

@@ -84,23 +84,35 @@ class TestConfigManager(unittest.TestCase):
 
     @patch('os.path.exists', return_value=True)
     @patch('builtins.open', new_callable=mock_open)
-    def test_config_load_existing_config(self, mock_file, mock_exists):
+    def test_config_load_valid_config_success(self, mock_file, mock_exists):
         """Test loading an existing config file."""
         # Set the mock file's read to return the sample config as JSON
         mock_file.return_value.read.return_value = json.dumps(self.sample_config)
         sut = ConfigManager()
         loaded_config = sut.load_config()
         self.assertEqual(loaded_config, self.sample_config)
+        
+    def test_config_load_non_ascii_values_success(self):
+        """Test loading a config file with non-ASCII/special characters."""
+        config_with_unicode = self.sample_config.copy()
+        config_with_unicode['world_file_name'] = '世界'
+        config_with_unicode['repo_path'] = 'D:/Backups/ヴァルハイム'
+        with open(self.temp_config_file, 'w', encoding='utf-8') as f:
+            json.dump(config_with_unicode, f, ensure_ascii=False)
+        sut = ConfigManager()
+        loaded = sut.load_config()
+        self.assertEqual(loaded['world_file_name'], '世界')
+        self.assertEqual(loaded['repo_path'], 'D:/Backups/ヴァルハイム')
 
     @patch('os.path.exists', return_value=False)
     @patch('builtins.open', new_callable=mock_open)
-    def test_config_load_missing_config(self, mock_open, mock_exists):
-        """Test loading config when file is missing, triggering generate_config."""
-        mock_open.return_value.read.return_value = json.dumps(self.sample_config)
+    def test_config_load_triggers_generate_on_missing_file(self, mock_open, mock_exists):
+        """Test that a missing config file triggers generate_config."""
         sut = ConfigManager()
-        with patch.object(ConfigManager, 'generate_config', return_value=self.sample_config.copy()):
+        with patch.object(ConfigManager, 'generate_config', return_value=self.sample_config.copy()) as mock_generate:
             loaded_config = sut.load_config()
-        self.assertEqual(loaded_config, self.sample_config)
+            mock_generate.assert_called_once()
+            self.assertEqual(loaded_config, self.sample_config)
 
     def test_config_load_invalid_json(self):
         """Test loading a config file with invalid/corrupted JSON."""
@@ -129,7 +141,28 @@ class TestConfigManager(unittest.TestCase):
         sut = ConfigManager()
         with self.assertRaises(json.JSONDecodeError):
             sut.load_config()
-                
+
+    def test_config_load_extra_fields_fails(self):
+        """Test that config with extra/unexpected fields is considered corrupt."""
+        config_with_extra = self.sample_config.copy()
+        config_with_extra['unexpected_field'] = 'extra_value'
+        with open(self.temp_config_file, 'w') as f:
+            json.dump(config_with_extra, f)
+        sut = ConfigManager()
+        with self.assertRaises(ValueError):
+            sut.load_config()
+
+    def test_config_load_empty_null_values_fails(self):
+        """Test that config with empty/null values is considered corrupt."""
+        config_with_empty = self.sample_config.copy()
+        config_with_empty['world_file_name'] = ''
+        config_with_empty['repo_path'] = None
+        with open(self.temp_config_file, 'w') as f:
+            json.dump(config_with_empty, f)
+        sut = ConfigManager()
+        with self.assertRaises(ValueError):
+            sut.load_config()
+
     @patch('os.path.exists', return_value=True)
     @patch('builtins.open', new_callable=mock_open)
     def test_config_print_success(self, mock_open, mock_exists):
@@ -152,39 +185,6 @@ class TestConfigManager(unittest.TestCase):
                 mocked_print.assert_any_call('\nCurrent configuration:\n')
                 for expected_line in expected_output:
                     mocked_print.assert_any_call(expected_line)
-
-    def test_config_load_extra_fields_fails(self):
-        """Test that config with extra/unexpected fields is considered corrupt."""
-        config_with_extra = self.sample_config.copy()
-        config_with_extra['unexpected_field'] = 'extra_value'
-        with open(self.temp_config_file, 'w') as f:
-            json.dump(config_with_extra, f)
-        sut = ConfigManager()
-        with self.assertRaises(Exception):
-            sut.load_config()
-
-    def test_config_load_non_ascii_success(self):
-        """Test loading a config file with non-ASCII/special characters."""
-        config_with_unicode = self.sample_config.copy()
-        config_with_unicode['world_file_name'] = '世界'
-        config_with_unicode['repo_path'] = 'D:/Backups/ヴァルハイム'
-        with open(self.temp_config_file, 'w', encoding='utf-8') as f:
-            json.dump(config_with_unicode, f, ensure_ascii=False)
-        sut = ConfigManager()
-        loaded = sut.load_config()
-        self.assertEqual(loaded['world_file_name'], '世界')
-        self.assertEqual(loaded['repo_path'], 'D:/Backups/ヴァルハイム')
-
-    def test_config_load_empty_null_values_fails(self):
-        """Test that config with empty/null values is considered corrupt."""
-        config_with_empty = self.sample_config.copy()
-        config_with_empty['world_file_name'] = ''
-        config_with_empty['repo_path'] = None
-        with open(self.temp_config_file, 'w') as f:
-            json.dump(config_with_empty, f)
-        sut = ConfigManager()
-        with self.assertRaises(Exception):
-            sut.load_config()
 
 if __name__ == '__main__':
     unittest.main()
