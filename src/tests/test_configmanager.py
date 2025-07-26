@@ -32,6 +32,7 @@ class TestConfigManager(unittest.TestCase):
         self.patcher.stop()
 
     def test_save_config(self):
+        """Test saving a config and verifying file contents."""
         config_manager = ConfigManager()
         test_config = {
             'world_file_name': 'TestWorld',
@@ -51,6 +52,7 @@ class TestConfigManager(unittest.TestCase):
     @patch('builtins.input', side_effect=['TestWorld', 'C:\\Users\\TestUser\\ValheimRepo'])
     @patch('os.getenv', return_value='C:\\Users\\TestUser')
     def test_generate_config(self, mock_input, mock_getenv):
+        """Test generating a config via user input and environment."""
         config_manager = ConfigManager()
         generated_config = config_manager.generate_config()
 
@@ -64,6 +66,7 @@ class TestConfigManager(unittest.TestCase):
         self.assertEqual(saved_config['repo_path'], 'C:\\Users\\TestUser\\ValheimRepo')
 
     def test_load_config_existing(self):
+        """Test loading an existing config file."""
         config_manager = ConfigManager()
 
         # Load the configuration
@@ -75,6 +78,7 @@ class TestConfigManager(unittest.TestCase):
     @patch('os.path.exists', return_value=False)
     @patch('builtins.open', new_callable=mock_open)
     def test_load_config_missing_file(self, mock_open, mock_exists):
+        """Test loading config when file is missing, triggering generate_config."""
         # Set up the mock open to read the temporary config file
         mock_open.return_value.read.return_value = json.dumps({
             'world_file_name': 'NewWorld',
@@ -108,6 +112,7 @@ class TestConfigManager(unittest.TestCase):
     })))
     @patch('builtins.input', side_effect=['TestWorld', 'C:\\Users\\TestUser\\ValheimRepo'])
     def test_print_config(self, mock_input, mock_exists):
+        """Test printing the current configuration to stdout."""
         config_manager = ConfigManager()
         with patch('builtins.print') as mocked_print:
             config_manager.print_config()
@@ -121,6 +126,28 @@ class TestConfigManager(unittest.TestCase):
             mocked_print.assert_any_call('\nCurrent configuration:\n')
             for expected_line in expected_output:
                 mocked_print.assert_any_call(expected_line)
+
+    def test_load_config_invalid_json(self):
+        """Test loading a config file with invalid/corrupted JSON."""
+        with open(self.temp_config_file, 'w') as f:
+            f.write('{invalid json}')
+        config_manager = ConfigManager()
+        with self.assertRaises(json.JSONDecodeError):
+            config_manager.load_config()
+
+    def test_load_config_missing_fields(self):
+        """Test loading a config file missing required fields."""
+        # Write a config missing 'repo_path'
+        incomplete_config = {
+            'world_file_name': 'TestWorld',
+            'local_path': 'C:/'
+        }
+        with open(self.temp_config_file, 'w') as f:
+            json.dump(incomplete_config, f)
+        config_manager = ConfigManager()
+        loaded = config_manager.load_config()
+        # Check that missing fields are actually missing
+        self.assertNotIn('repo_path', loaded)
 
 if __name__ == '__main__':
     unittest.main()
