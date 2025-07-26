@@ -27,7 +27,7 @@ class ConfigManager:
     print('\nNew configuration:\n')
     world_file_name = input('  Name of the Valheim world: ')
     local_path = os.path.join(os.getenv('USERPROFILE'), 'AppData', 'LocalLow', 'IronGate', 'Valheim', 'worlds_local')
-    repo_path = input('  Path to Valiheim remote repository: ')
+    repo_path = input('  Path to Valheim remote repository: ')
     config = {
       'world_file_name': world_file_name,
       'local_path': local_path,
