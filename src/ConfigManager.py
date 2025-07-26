@@ -39,7 +39,7 @@ class ConfigManager:
   def load_config(self):
     print('Loading config file...')
     if not os.path.exists(self.USER_CONFIG):
-      print('Config file not found.')
+      logging.error('Config file not found.')
       new_config = self.generate_config()
       return new_config
     # Check if the config path is a directory
