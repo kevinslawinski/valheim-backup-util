@@ -4,8 +4,45 @@ import time
 from services.config_service import ConfigService
 from services.file_service import FileService
 
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
+def run():
+    while True:
+        # Load config
+        menu_header()
+        try:
+            print('Loading config file...')
+            ConfigService().get()
+        except PermissionError:
+            print('You\'re on your own with this one...')
+            return
+        except Exception:
+            print('Generating new config file...')
+            prompt_new_config()
+        time.sleep(1)
+        
+        # Display main menu
+        clear_screen()
+        menu_header()
+        menu_options()
+
+        choice = prompt_menu_choice()
+        
+        if choice == '1':
+            FileService.sync_files('upload')
+        elif choice == '2':
+            FileService.sync_files('download')
+        elif choice == '3':
+            print_config()
+        elif choice == '4':
+            prompt_new_config()
+        elif choice == '0':
+            print('Goodbye!')
+            break
+        else:
+            print('Not an option. Try again.')
+        
+        input('\nPress Enter to continue...')
+        clear_screen()
+        time.sleep(0.5)
 
 def menu_header():
     title = 'Valheim Backup Utility'
@@ -13,17 +50,13 @@ def menu_header():
     print(f"{border}\n{title}\n{border}")
     
 def menu_options():
-    print('(1) Upload world files to git repository')
-    print('(2) Download world files from git repository')
-    print('(3) Read current config')
-    print('(4) Regenerate config')
-
-def prompt_for_choice():
-    choice = input('Choose an option (1-4, 0 to exit): ')
-    return choice
+    print('  (1) Upload world files to git repository')
+    print('  (2) Download world files from git repository')
+    print('  (3) Read current config')
+    print('  (4) Regenerate config')
 
 def print_config():
-    config = ConfigService().load_config()
+    config = ConfigService().get()
     print('\nCurrent configuration:\n')
     print(f'  World Name: {config.get("world_file_name")}')
     print(f'  Valheim Save Location: {config.get("local_path")}')
@@ -39,35 +72,13 @@ def prompt_new_config():
       'local_path': local_path,
       'repo_path': repo_path
     }
-    ConfigService().save_config(config)
+    ConfigService().save(config)
+    print('\nConfiguration saved successfully!')
     return config
 
-def run():
-    while True:
-        menu_header()
-        print('Loading config file...')
-        config_service = ConfigService()
-        config_service.load_config()
-        time.sleep(1)
-        clear_screen()
-        menu_header()
-        menu_options()
+def prompt_menu_choice():
+    choice = input('Choose an option (1-4, 0 to exit): ')
+    return choice
 
-        choice = prompt_for_choice()
-        
-        if choice == '1':
-            FileService.sync_files('upload')
-        elif choice == '2':
-            FileService.sync_files('download')
-        elif choice == '3':
-            print_config()
-            input('\nPress Enter to return to the main menu...')
-            clear_screen()
-        elif choice == '4':
-            prompt_new_config()
-        elif choice == '0':
-            print('Goodbye!')
-            break
-        else:
-            print('Not an option. Try again.')
-        time.sleep(0.5)
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')

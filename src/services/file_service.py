@@ -19,7 +19,7 @@ class FileService:
   @staticmethod
   def sync_files(action):
     config_service = ConfigService()
-    config = config_service.load_config()
+    config = config_service.get()
     world_file = config.get('world_file_name')
     local_path = config.get('local_path')
     repo_path = config.get('repo_path')

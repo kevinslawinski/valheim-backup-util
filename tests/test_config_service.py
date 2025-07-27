@@ -45,7 +45,7 @@ class TestConfigService(unittest.TestCase):
             'local_path': 'D:\\Games\\Valheim\\worlds_local',
             'repo_path': 'D:\\Backups\\ValheimRepo'
         }
-        sut.save_config(new_config)
+        sut.save(new_config)
         # Check that open was called with the correct file, mode, and encoding
         mock_open.assert_called_with(sut.USER_CONFIG, 'w', encoding='utf-8')
         # Use the actual file handle from the mock
@@ -70,7 +70,7 @@ class TestConfigService(unittest.TestCase):
             self.assertEqual(generated_config['repo_path'], self.sample_config['repo_path'])
 
             # Verify that the config is saved correctly to the file
-            saved_config = sut.load_config()
+            saved_config = sut.get()
             self.assertEqual(saved_config['world_file_name'], self.sample_config['world_file_name'])
             self.assertEqual(saved_config['repo_path'], self.sample_config['repo_path'])
 
@@ -81,7 +81,7 @@ class TestConfigService(unittest.TestCase):
         # Set the mock file's read to return the sample config as JSON
         mock_file.return_value.read.return_value = json.dumps(self.sample_config)
         sut = ConfigService()
-        loaded_config = sut.load_config()
+        loaded_config = sut.get()
         self.assertEqual(loaded_config, self.sample_config)
         
     def test_config_load_non_ascii_values_success(self):
@@ -92,7 +92,7 @@ class TestConfigService(unittest.TestCase):
         with open(self.temp_config_file, 'w', encoding='utf-8') as f:
             json.dump(config_with_unicode, f, ensure_ascii=False)
         sut = ConfigService()
-        loaded = sut.load_config()
+        loaded = sut.get()
         self.assertEqual(loaded['world_file_name'], '世界')
         self.assertEqual(loaded['repo_path'], 'D:/Backups/ヴァルハイム')
 
@@ -102,7 +102,7 @@ class TestConfigService(unittest.TestCase):
         """Test that a missing config file triggers generate_config."""
         sut = ConfigService()
         with patch.object(ConfigService, 'generate_config', return_value=self.sample_config.copy()) as mock_generate:
-            loaded_config = sut.load_config()
+            loaded_config = sut.get()
             mock_generate.assert_called_once()
             self.assertEqual(loaded_config, self.sample_config)
 
@@ -118,7 +118,7 @@ class TestConfigService(unittest.TestCase):
                     f.write(file_content)
                 sut = ConfigService()
                 with self.assertRaises(json.JSONDecodeError):
-                    sut.load_config()
+                    sut.get()
 
     def test_config_load_missing_fields(self):
         """Test loading a config file missing required fields."""
@@ -131,7 +131,7 @@ class TestConfigService(unittest.TestCase):
                     json.dump(incomplete_config, f)
                 sut = ConfigService()
                 with self.assertRaises(ValueError) as cm:
-                    sut.load_config()
+                    sut.get()
                 self.assertIn(f"Config missing required fields: {{{field!r}}}", str(cm.exception))
 
     def test_config_load_corrupt_configs_fail(self):
@@ -152,7 +152,7 @@ class TestConfigService(unittest.TestCase):
                     json.dump(config, f)
                 sut = ConfigService()
                 with self.assertRaises(ValueError) as cm:
-                    sut.load_config()
+                    sut.get()
                 if expected_msg:
                     self.assertIn(expected_msg, str(cm.exception))
                 else:
@@ -174,7 +174,7 @@ class TestConfigService(unittest.TestCase):
             with self.subTest(error=case):
                 with patch('builtins.open', side_effect=error):
                     with self.assertRaises(error):
-                        sut.save_config(test_config)
+                        sut.save(test_config)
 
     @patch('os.path.exists', return_value=True)
     @patch('builtins.open', new_callable=mock_open)
@@ -208,7 +208,7 @@ class TestConfigService(unittest.TestCase):
         try:
             sut = ConfigService()
             with self.assertRaises(ValueError) as cm:
-                sut.load_config()
+                sut.get()
             self.assertEqual(str(cm.exception), 'Config path is a directory, not a file.')
         finally:
             # Clean up the directory
