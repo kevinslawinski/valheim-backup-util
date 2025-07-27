@@ -1,8 +1,8 @@
 import os
 import shutil
-from ConfigManager import ConfigManager
+from services.config_service import ConfigService
 
-class FileManager:
+class FileService:
   @staticmethod
   def copy_files(src, dst, files):
     for file in files:
@@ -18,8 +18,8 @@ class FileManager:
     
   @staticmethod
   def sync_files(action):
-    configManager = ConfigManager()
-    config = configManager.load_config()
+    config_service = ConfigService()
+    config = config_service.load_config()
     world_file = config.get('world_file_name')
     local_path = config.get('local_path')
     repo_path = config.get('repo_path')
@@ -27,13 +27,13 @@ class FileManager:
     if action == 'upload':
       confirm = input(f'End of session upload. Confirm: (y/n) ')
       if confirm.lower() == 'y':
-        FileManager.copy_files(local_path, repo_path, files)
+        FileService.copy_files(local_path, repo_path, files)
       else:
         print('Nothing uploaded.')
     elif action == 'download':
       confirm = input(f'Start of session download. Confirm: (y/n) ')
       if confirm.lower() == 'y':
-        FileManager.copy_files(repo_path, local_path, files)
+        FileService.copy_files(repo_path, local_path, files)
       else:
         print('Nothing downloaded.')
     print('Navigating to main menu...')

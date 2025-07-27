@@ -5,9 +5,9 @@ import tempfile
 from unittest import mock
 from unittest.mock import mock_open, patch
 
-from src.ConfigManager import ConfigManager
+from src.services.config_service import ConfigService
 
-class TestConfigManager(unittest.TestCase):
+class TestConfigService(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Shared sample config for all tests
@@ -23,7 +23,7 @@ class TestConfigManager(unittest.TestCase):
         self.temp_config_file = self.tempfile.name
         self.tempfile.close()
         # Patch USER_CONFIG to use the temp file
-        self.patcher = patch.object(ConfigManager, 'USER_CONFIG', self.temp_config_file)
+        self.patcher = patch.object(ConfigService, 'USER_CONFIG', self.temp_config_file)
         self.patcher.start()
         # Write the shared sample config to the temp file
         with open(self.temp_config_file, 'w') as f:
@@ -38,7 +38,7 @@ class TestConfigManager(unittest.TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_config_save_success(self, mock_open):
         """Test saving a config and verifying file contents."""
-        sut = ConfigManager()
+        sut = ConfigService()
         # Use a config with different values than sample_config
         new_config = {
             'world_file_name': 'NewWorld',
@@ -62,7 +62,7 @@ class TestConfigManager(unittest.TestCase):
             self.sample_config['world_file_name'],
             self.sample_config['repo_path']
         ]):
-            sut = ConfigManager()
+            sut = ConfigService()
             generated_config = sut.generate_config()
 
             # Check if the generated config matches the expected format
@@ -80,7 +80,7 @@ class TestConfigManager(unittest.TestCase):
         """Test loading an existing config file."""
         # Set the mock file's read to return the sample config as JSON
         mock_file.return_value.read.return_value = json.dumps(self.sample_config)
-        sut = ConfigManager()
+        sut = ConfigService()
         loaded_config = sut.load_config()
         self.assertEqual(loaded_config, self.sample_config)
         
@@ -91,7 +91,7 @@ class TestConfigManager(unittest.TestCase):
         config_with_unicode['repo_path'] = 'D:/Backups/ヴァルハイム'
         with open(self.temp_config_file, 'w', encoding='utf-8') as f:
             json.dump(config_with_unicode, f, ensure_ascii=False)
-        sut = ConfigManager()
+        sut = ConfigService()
         loaded = sut.load_config()
         self.assertEqual(loaded['world_file_name'], '世界')
         self.assertEqual(loaded['repo_path'], 'D:/Backups/ヴァルハイム')
@@ -100,8 +100,8 @@ class TestConfigManager(unittest.TestCase):
     @patch('builtins.open', new_callable=mock_open)
     def test_config_load_triggers_generate_on_missing_file(self, mock_open, mock_exists):
         """Test that a missing config file triggers generate_config."""
-        sut = ConfigManager()
-        with patch.object(ConfigManager, 'generate_config', return_value=self.sample_config.copy()) as mock_generate:
+        sut = ConfigService()
+        with patch.object(ConfigService, 'generate_config', return_value=self.sample_config.copy()) as mock_generate:
             loaded_config = sut.load_config()
             mock_generate.assert_called_once()
             self.assertEqual(loaded_config, self.sample_config)
@@ -116,7 +116,7 @@ class TestConfigManager(unittest.TestCase):
             with self.subTest(case=case):
                 with open(self.temp_config_file, 'w') as f:
                     f.write(file_content)
-                sut = ConfigManager()
+                sut = ConfigService()
                 with self.assertRaises(json.JSONDecodeError):
                     sut.load_config()
 
@@ -129,7 +129,7 @@ class TestConfigManager(unittest.TestCase):
                 incomplete_config.pop(field)
                 with open(self.temp_config_file, 'w') as f:
                     json.dump(incomplete_config, f)
-                sut = ConfigManager()
+                sut = ConfigService()
                 with self.assertRaises(ValueError) as cm:
                     sut.load_config()
                 self.assertIn(f"Config missing required fields: {{{field!r}}}", str(cm.exception))
@@ -150,7 +150,7 @@ class TestConfigManager(unittest.TestCase):
             with self.subTest(case=case):
                 with open(self.temp_config_file, 'w') as f:
                     json.dump(config, f)
-                sut = ConfigManager()
+                sut = ConfigService()
                 with self.assertRaises(ValueError) as cm:
                     sut.load_config()
                 if expected_msg:
@@ -168,7 +168,7 @@ class TestConfigManager(unittest.TestCase):
             (PermissionError, 'PermissionError'),
             (OSError, 'OSError'),
         ]
-        sut = ConfigManager()
+        sut = ConfigService()
         test_config = self.sample_config.copy()
         for error, case in error_cases:
             with self.subTest(error=case):
@@ -186,7 +186,7 @@ class TestConfigManager(unittest.TestCase):
             self.sample_config['world_file_name'],
             self.sample_config['repo_path']
         ]):
-            sut = ConfigManager()
+            sut = ConfigService()
             with patch('builtins.print') as mocked_print:
                 sut.print_config()
                 # Check if print function was called with the correct output
@@ -206,7 +206,7 @@ class TestConfigManager(unittest.TestCase):
             os.remove(self.temp_config_file)
         os.mkdir(self.temp_config_file)
         try:
-            sut = ConfigManager()
+            sut = ConfigService()
             with self.assertRaises(ValueError) as cm:
                 sut.load_config()
             self.assertEqual(str(cm.exception), 'Config path is a directory, not a file.')

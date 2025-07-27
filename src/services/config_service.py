@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-class ConfigManager:
+class ConfigService:
   USER_CONFIG = 'config.json'
     
   def save_config(self, config):
