@@ -6,17 +6,9 @@ from services.file_service import FileService
 
 def run():
     while True:
-        # Load config
         menu_header()
-        try:
-            print('Loading config file...')
-            ConfigService().get()
-        except PermissionError:
-            print('You\'re on your own with this one...')
-            return
-        except Exception:
-            print('Generating new config file...')
-            prompt_new_config()
+        
+        get_config()
         time.sleep(1)
         
         # Display main menu
@@ -25,7 +17,6 @@ def run():
         menu_options()
 
         choice = prompt_menu_choice()
-        
         if choice == '1':
             FileService.sync_files('upload')
         elif choice == '2':
@@ -55,12 +46,24 @@ def menu_options():
     print('  (3) Read current config')
     print('  (4) Regenerate config')
 
+def get_config():
+    print('Loading config file...')
+    try:
+        return ConfigService().get()
+    except PermissionError:
+        print('You\'re on your own with this one...')
+        return None
+    except Exception:
+        print('Generating new config file...')
+        return prompt_new_config()
+
 def print_config():
-    config = ConfigService().get()
-    print('\nCurrent configuration:\n')
-    print(f'  World Name: {config.get("world_file_name")}')
-    print(f'  Valheim Save Location: {config.get("local_path")}')
-    print(f'  Repo Path: {config.get("repo_path")}')
+    config = get_config()
+    print(f"""Current configuration:
+          
+        World Name: {config.get("world_file_name")}
+        Valheim Save Location: {config.get("local_path")}
+        Repo Path: {config.get("repo_path")}""")
     
 def prompt_new_config():
     print('\nNew configuration:\n')
