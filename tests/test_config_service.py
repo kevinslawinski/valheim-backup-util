@@ -71,7 +71,7 @@ class TestConfigService(unittest.TestCase):
 
     @patch('os.path.exists', return_value=True)
     @patch('builtins.open', new_callable=mock_open)
-    def test_config_load_valid_config_success(self, mock_file, mock_exists):
+    def test_config_get_valid_config_success(self, mock_file, mock_exists):
         """Test loading an existing config file."""
         # Set the mock file's read to return the sample config as JSON
         mock_file.return_value.read.return_value = json.dumps(self.sample_config)
@@ -79,7 +79,7 @@ class TestConfigService(unittest.TestCase):
         loaded_config = sut.get()
         self.assertEqual(loaded_config, self.sample_config)
         
-    def test_config_load_non_ascii_values_success(self):
+    def test_config_get_non_ascii_values_success(self):
         """Test loading a config file with non-ASCII/special characters."""
         config_with_unicode = self.sample_config.copy()
         config_with_unicode['world_file_name'] = '世界'
@@ -91,7 +91,7 @@ class TestConfigService(unittest.TestCase):
         self.assertEqual(loaded['world_file_name'], '世界')
         self.assertEqual(loaded['repo_path'], 'D:/Backups/ヴァルハイム')
 
-    def test_config_load_invalid_json_and_empty_file(self):
+    def test_config_get_invalid_json_and_empty_file(self):
         """Test loading a config file with invalid/corrupted JSON or empty file raises JSONDecodeError."""
         cases = [
             ('{invalid json}', 'invalid json'),
@@ -105,7 +105,7 @@ class TestConfigService(unittest.TestCase):
                 with self.assertRaises(json.JSONDecodeError):
                     sut.get()
 
-    def test_config_load_missing_fields(self):
+    def test_config_get_missing_fields(self):
         """Test loading a config file missing required fields."""
         required_fields = ['world_file_name', 'local_path', 'repo_path']
         for field in required_fields:
@@ -119,7 +119,7 @@ class TestConfigService(unittest.TestCase):
                     sut.get()
                 self.assertIn(f"Config is missing required fields: {{{field!r}}}", str(cm.exception))
 
-    def test_config_load_corrupt_configs_fail(self):
+    def test_config_get_corrupt_configs_fail(self):
         """Test that corrupt configs (extra fields, empty/null values) are considered invalid."""
         corrupt_cases = [
             # Extra/unexpected field
@@ -147,7 +147,7 @@ class TestConfigService(unittest.TestCase):
                         "Config field 'repo_path' is empty or null." in str(cm.exception)
                     )
 
-    def test_config_load_when_path_is_directory(self):
+    def test_config_get_when_path_is_directory(self):
         """Test loading config when the config path is a directory, not a file."""
         # Remove temp file and create a directory at the same path
         if os.path.exists(self.temp_config_file):
