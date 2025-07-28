@@ -66,7 +66,7 @@ class ConfigService:
                 for field in required_fields:
                     if config[field] is None or config[field] == '':
                         raise ValueError(f"Config field '{field}' is empty or null.")
-                    return config
+                return config
         except json.JSONDecodeError as e:
             logging.error("Config file is not valid JSON: %s", e)
             raise
