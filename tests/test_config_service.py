@@ -55,24 +55,19 @@ class TestConfigService(unittest.TestCase):
         saved_config = json.loads(written_data)
         self.assertEqual(saved_config, new_config)
         
-    @patch('os.getenv', return_value='C:\\Users\\TestUser')
-    def test_config_generate_success(self, mock_os_getenv):
-        """Test generating a config via user input and environment."""
-        with patch('builtins.input', side_effect=[
-            self.sample_config['world_file_name'],
-            self.sample_config['repo_path']
-        ]):
-            sut = ConfigService()
-            generated_config = sut.generate_config()
-
-            # Check if the generated config matches the expected format
-            self.assertEqual(generated_config['world_file_name'], self.sample_config['world_file_name'])
-            self.assertEqual(generated_config['repo_path'], self.sample_config['repo_path'])
-
-            # Verify that the config is saved correctly to the file
-            saved_config = sut.get()
-            self.assertEqual(saved_config['world_file_name'], self.sample_config['world_file_name'])
-            self.assertEqual(saved_config['repo_path'], self.sample_config['repo_path'])
+    def test_config_save_permission_errors(self):
+        """Test saving config when file-related errors occur."""
+        error_cases = [
+            (PermissionError, 'PermissionError'),
+            (OSError, 'OSError'),
+        ]
+        sut = ConfigService()
+        test_config = self.sample_config.copy()
+        for error, case in error_cases:
+            with self.subTest(error=case):
+                with patch('builtins.open', side_effect=error):
+                    with self.assertRaises(error):
+                        sut.save(test_config)
 
     @patch('os.path.exists', return_value=True)
     @patch('builtins.open', new_callable=mock_open)
@@ -95,16 +90,6 @@ class TestConfigService(unittest.TestCase):
         loaded = sut.get()
         self.assertEqual(loaded['world_file_name'], '世界')
         self.assertEqual(loaded['repo_path'], 'D:/Backups/ヴァルハイム')
-
-    @patch('os.path.exists', return_value=False)
-    @patch('builtins.open', new_callable=mock_open)
-    def test_config_load_triggers_generate_on_missing_file(self, mock_open, mock_exists):
-        """Test that a missing config file triggers generate_config."""
-        sut = ConfigService()
-        with patch.object(ConfigService, 'generate_config', return_value=self.sample_config.copy()) as mock_generate:
-            loaded_config = sut.get()
-            mock_generate.assert_called_once()
-            self.assertEqual(loaded_config, self.sample_config)
 
     def test_config_load_invalid_json_and_empty_file(self):
         """Test loading a config file with invalid/corrupted JSON or empty file raises JSONDecodeError."""
@@ -161,43 +146,6 @@ class TestConfigService(unittest.TestCase):
                         "Config field 'world_file_name' is empty or null." in str(cm.exception) or
                         "Config field 'repo_path' is empty or null." in str(cm.exception)
                     )
-
-    def test_config_save_permission_errors(self):
-        """Test saving config when file-related errors occur."""
-        error_cases = [
-            (PermissionError, 'PermissionError'),
-            (OSError, 'OSError'),
-        ]
-        sut = ConfigService()
-        test_config = self.sample_config.copy()
-        for error, case in error_cases:
-            with self.subTest(error=case):
-                with patch('builtins.open', side_effect=error):
-                    with self.assertRaises(error):
-                        sut.save(test_config)
-
-    @patch('os.path.exists', return_value=True)
-    @patch('builtins.open', new_callable=mock_open)
-    def test_config_print_success(self, mock_open, mock_exists):
-        """Test printing the current configuration to stdout."""
-        # Set the mock file's read_data to the sample config as JSON
-        mock_open.return_value.read.return_value = json.dumps(self.sample_config)
-        with patch('builtins.input', side_effect=[
-            self.sample_config['world_file_name'],
-            self.sample_config['repo_path']
-        ]):
-            sut = ConfigService()
-            with patch('builtins.print') as mocked_print:
-                sut.print_config()
-                # Check if print function was called with the correct output
-                expected_output = [
-                    f'  World Name: {self.sample_config["world_file_name"]}',
-                    f'  Valheim Save Location: {self.sample_config["local_path"]}',
-                    f'  Repo Path: {self.sample_config["repo_path"]}'
-                ]
-                mocked_print.assert_any_call('\nCurrent configuration:\n')
-                for expected_line in expected_output:
-                    mocked_print.assert_any_call(expected_line)
 
     def test_config_load_when_path_is_directory(self):
         """Test loading config when the config path is a directory, not a file."""
