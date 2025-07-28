@@ -4,10 +4,11 @@ class App:
     @staticmethod
     def start():
         if '--cli' in sys.argv:
-            from ui.console import run
+            import ui.console as console
+            console.run()
         else:
-            from ui.gui import run
-        run()
-  
+            import ui.gui as gui
+            gui.run()
+
 if __name__ == '__main__':
     App.start()
