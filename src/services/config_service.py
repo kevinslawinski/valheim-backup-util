@@ -46,7 +46,9 @@ class ConfigService:
         
         # Check if the config path is a directory
         if os.path.isdir(cls.USER_CONFIG):
-            raise ValueError('Config path is a directory, not a file.')
+            message = f"Config path '{cls.USER_CONFIG}' is a directory, not a file."
+            logging.error(message)
+            raise ValueError(message)
         
         try:
             with open(cls.USER_CONFIG, 'r', encoding='utf-8') as config_file:
@@ -57,22 +59,28 @@ class ConfigService:
                 # Check for missing fields
                 missing = required_fields - config_keys
                 if missing:
-                    raise ValueError(f"Config missing required fields: {missing}")
+                    message = f"Config is missing required fields: {missing}"
+                    logging.error(message)
+                    raise ValueError(message)
                 # Check for extra fields
                 extra = config_keys - required_fields
                 if extra:
-                    raise ValueError(f"Config has unexpected fields: {extra}")
+                    message = f"Config has unexpected fields: {extra}"
+                    logging.error(message)
+                    raise ValueError(message)
                 # Check for empty or null values
                 for field in required_fields:
                     if config[field] is None or config[field] == '':
-                        raise ValueError(f"Config field '{field}' is empty or null.")
+                        message = f"Config field '{field}' is empty or null."
+                        logging.error(message)
+                        raise ValueError(message)
                 return config
         except json.JSONDecodeError as e:
-            logging.error("Config file is not valid JSON: %s", e)
+            logging.error(f"Config file is not valid JSON: {e}")
             raise
         except PermissionError as e:
-            logging.error("Permission denied when loading config: %s", e)
+            logging.error(f"Permission denied when loading config: {e}")
             raise
         except Exception as e:
-            logging.error("Unexpected error when loading config: %s", e)
+            logging.error(f"Unexpected error when loading config: {e}")
             raise
