@@ -4,8 +4,22 @@ import shutil
 from services.config_service import ConfigService
 
 class FileService:
+    """
+    Provides file operations for syncing Valheim world files between local and remote paths.
+    """
     @staticmethod
     def _copy_files(src, dst, files):
+        """
+        Copy specified files from source to destination directory.
+        Args:
+            src (str): Source directory path.
+            dst (str): Destination directory path.
+            files (list): List of filenames to copy.
+        Logs:
+            Info when a file is copied successfully.
+            Warning if a file is not found.
+            Error for other exceptions during copy.
+        """
         for file in files:
             src_file = os.path.join(src, file)
             dst_file = os.path.join(dst, file)
@@ -19,6 +33,14 @@ class FileService:
     
     @staticmethod
     def sync_files(action):
+        """
+        Sync Valheim world files between local and remote paths based on the action.
+        Args:
+            action (str): 'upload' to copy from local to remote, 'download' to copy from remote to local.
+        Logs:
+            Warning for unknown actions.
+            Error for unhandled exceptions during sync.
+        """
         try:
             config = ConfigService().get()
             world_file = config.get('world_file_name')

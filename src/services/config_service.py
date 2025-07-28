@@ -14,6 +14,8 @@ class ConfigService:
         Raises:
             PermissionError: If the file cannot be written due to permissions.
             Exception: For any other unexpected errors during save.
+        Notes:
+            Logs a warning if saving fails due to permissions or other errors.
         """
         try:
             with open(cls.USER_CONFIG, 'w', encoding='utf-8') as config_file:
@@ -37,6 +39,9 @@ class ConfigService:
             json.JSONDecodeError: If the config file is not valid JSON.
             PermissionError: If the file cannot be read due to permissions.
             Exception: For any other unexpected errors during load.
+        Notes:
+            Logs errors for missing file, directory path, missing/extra/empty fields, invalid JSON, and permission issues.
+            Validates required fields ('world_file_name', 'local_path', 'repo_path') and checks for empty/null values.
         """
         # Check if the config file exists
         if not os.path.exists(cls.USER_CONFIG):
