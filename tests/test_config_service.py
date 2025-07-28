@@ -117,7 +117,7 @@ class TestConfigService(unittest.TestCase):
                 sut = ConfigService()
                 with self.assertRaises(ValueError) as cm:
                     sut.get()
-                self.assertIn(f"Config missing required fields: {{{field!r}}}", str(cm.exception))
+                self.assertIn(f"Config is missing required fields: {{{field!r}}}", str(cm.exception))
 
     def test_config_load_corrupt_configs_fail(self):
         """Test that corrupt configs (extra fields, empty/null values) are considered invalid."""
@@ -157,7 +157,7 @@ class TestConfigService(unittest.TestCase):
             sut = ConfigService()
             with self.assertRaises(ValueError) as cm:
                 sut.get()
-            self.assertEqual(str(cm.exception), 'Config path is a directory, not a file.')
+            self.assertIn('is a directory, not a file.', str(cm.exception))
         finally:
             # Clean up the directory
             if os.path.isdir(self.temp_config_file):

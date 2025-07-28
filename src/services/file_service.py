@@ -1,7 +1,7 @@
 import logging
 import os
 import shutil
-from services.config_service import ConfigService
+from .config_service import ConfigService
 
 class FileService:
     """
