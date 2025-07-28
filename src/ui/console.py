@@ -18,9 +18,17 @@ def run():
 
         choice = prompt_menu_choice()
         if choice == '1':
-            FileService.sync_files('upload')
+            confirm = input(f'END of session upload? Confirm: (y/n) ')
+            if confirm.lower() == 'y':
+                FileService.sync_files('upload')
+            else:
+                print('Nothing uploaded.')
         elif choice == '2':
-            FileService.sync_files('download')
+            confirm = input(f'START of session download? Confirm: (y/n) ')
+            if confirm.lower() == 'y':
+                FileService.sync_files('download')
+            else:
+                print('Nothing downloaded.')
         elif choice == '3':
             print_config()
         elif choice == '4':
