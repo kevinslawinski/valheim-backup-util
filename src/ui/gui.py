@@ -41,7 +41,7 @@ class App(customtkinter.CTk):
         # Layout
         radio_download.grid(row=0, column=0, padx=20, pady=(15, 5), ipady=10, sticky="we")
         radio_upload.grid(row=1, column=0, padx=20, pady=(5, 15), ipady=10, sticky="we")
-        button_start.grid(row=2, column=1, padx=20, ipady=10, sticky="w")
+        button_start.grid(row=2, column=1, padx=20, pady=15, ipady=10, sticky="w")
         
         frame_config.grid(row=0, column=2, rowspan=4, padx=10, pady=10, sticky="nse")
         
