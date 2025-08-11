@@ -8,12 +8,12 @@ class App:
         logging.initialize_logger()
         
         # Default GUI, but offer CLI option with --cli
-        if '--gui' in sys.argv:
-            import ui.gui as gui
-            gui.run()
-        else:
+        if '--cli' in sys.argv:
             import ui.console as console
             console.run()
+        else:
+            import ui.gui as gui
+            gui.run()
 
 if __name__ == '__main__':
     App.start()
