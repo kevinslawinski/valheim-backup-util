@@ -13,33 +13,42 @@ class App(customtkinter.CTk):
         self.radio_var = customtkinter.IntVar(master=self, value=0)
         self.status_text = customtkinter.StringVar(value="Ready")
         self._create_widgets()
-        self._layout_widgets()
+        self._layout_widgets_pack()
         
     def _configure_window(self):
         """Configure the main window."""
         self.title(self.WINDOW_TITLE)
         self.geometry(f"{self.WINDOW_HEIGHT}x{self.WINDOW_WIDTH}+800+400")
-        self.grid_columnconfigure((0, 1, 2), weight=1)
-        self.grid_rowconfigure((0, 1, 2, 3), weight=1)
+        # self.grid_columnconfigure((0, 1, 2), weight=1)
+        # self.grid_rowconfigure((0, 1, 2, 3), weight=1)
 
     def _create_widgets(self):
         """Create all widgets used in the application."""
+        self.frame_actions = customtkinter.CTkFrame(self)
+        self.frame_config = customtkinter.CTkFrame(self)
+        self.frame_status = customtkinter.CTkFrame(self)
         self.radio_download = customtkinter.CTkRadioButton(
-            self,
+            self.frame_actions,
             text="Download (Start of session)",
             variable=self.radio_var,
             value=1,
         )
         self.radio_upload = customtkinter.CTkRadioButton(
-            self,
+            self.frame_actions,
             text="Upload (End of session)",
             variable=self.radio_var,
             value=2,
         )
-        self.button_start = customtkinter.CTkButton(self, text="Start", command=self.on_start_button_click)
-        self.frame_config = customtkinter.CTkFrame(self)
-        self.frame_status = customtkinter.CTkFrame(self)
-        self.label_status = customtkinter.CTkLabel(self.frame_status, textvariable=self.status_text, font=("Arial", 14))
+        self.button_start = customtkinter.CTkButton(
+            self.frame_actions, 
+            text="Start", 
+            command=self.on_start_button_click
+            )
+        self.label_status = customtkinter.CTkLabel(
+            self.frame_status, 
+            textvariable=self.status_text, 
+            font=("Arial", 14)
+            )
         
     def _layout_widgets(self):
         """Arrange widgets in the application window."""
@@ -49,6 +58,21 @@ class App(customtkinter.CTk):
         self.frame_config.grid(row=0, column=2, rowspan=4, padx=10, pady=10, sticky="nse")
         self.frame_status.grid(row=3, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="nswe")
         self.label_status.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        
+    def _layout_widgets_pack(self):
+        """Arrange widgets in the application window."""
+        # Pack frames
+        self.frame_actions.pack(side="top", padx=10, pady=(10, 5), fill="x")
+        self.frame_status.pack(side="top", padx=10, pady=(5, 10), fill="x")
+        self.frame_config.pack(side="right", padx=10, pady=10, fill="both", expand=True)
+        
+        # Pack actions frame widgets
+        self.radio_download.pack(padx=20, pady=(15, 5), fill="x")
+        self.radio_upload.pack(padx=20, pady=(5, 15), fill="x")
+        self.button_start.pack(padx=20, pady=15)
+
+        # Pack status frame widgets
+        self.label_status.pack(padx=10, pady=10, anchor="w")
     
     def on_start_button_click(self):
         """Handle the Start button click event."""
