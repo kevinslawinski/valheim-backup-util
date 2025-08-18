@@ -67,7 +67,7 @@ class App(customtkinter.CTk):
         # Pack action widgets for frame_actions
         self.radio_download.pack(padx=20, pady=(15, 5), fill="x")
         self.radio_upload.pack(padx=20, pady=(5, 15), fill="x")
-        self.button_start.pack(padx=20, pady=15, anchor="s")
+        self.button_start.pack(side="bottom", padx=20, pady=15)
 
         # Pack labels
         self.label_status.pack(padx=10, pady=10, anchor="w") # Status label
