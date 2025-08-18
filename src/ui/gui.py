@@ -24,6 +24,7 @@ class App(customtkinter.CTk):
 
     def _create_widgets(self):
         """Create all widgets used in the application."""
+        self.frame_top = customtkinter.CTkFrame(self)
         self.frame_actions = customtkinter.CTkFrame(self)
         self.frame_config = customtkinter.CTkFrame(self)
         self.frame_status = customtkinter.CTkFrame(self)
@@ -49,6 +50,11 @@ class App(customtkinter.CTk):
             textvariable=self.status_text, 
             font=("Arial", 14)
             )
+        self.label_config = customtkinter.CTkLabel(
+            self.frame_config,
+            text="Configuration",
+            font=("Arial", 16, "bold")
+        )
         
     def _layout_widgets(self):
         """Arrange widgets in the application window."""
@@ -61,10 +67,17 @@ class App(customtkinter.CTk):
         
     def _layout_widgets_pack(self):
         """Arrange widgets in the application window."""
-        # Pack frames
-        self.frame_actions.pack(side="top", padx=10, pady=(10, 5), fill="x")
-        self.frame_status.pack(side="top", padx=10, pady=(5, 10), fill="x")
-        self.frame_config.pack(side="right", padx=10, pady=10, fill="both", expand=True)
+        # Pack the parent frame to hold the top two frames (actions and config)
+        self.frame_top.pack(side="top", fill="both", expand=True)
+
+        # Pack the actions frame (top left) inside the top parent frame
+        self.frame_actions.pack(in_=self.frame_top, side="left", fill="both", padx=10, pady=10)
+
+        # Pack the config frame (top right) inside the top parent frame
+        self.frame_config.pack(in_=self.frame_top, side="right", fill="both", expand=True, padx=10, pady=10)
+
+        # Pack the status frame (bottom) to span the entire width of the window
+        self.frame_status.pack(side="bottom", fill="both", expand=True, padx=10, pady=10)
         
         # Pack actions frame widgets
         self.radio_download.pack(padx=20, pady=(15, 5), fill="x")
@@ -73,6 +86,7 @@ class App(customtkinter.CTk):
 
         # Pack status frame widgets
         self.label_status.pack(padx=10, pady=10, anchor="w")
+        self.label_config.pack(padx=10, pady=10, anchor="n")
     
     def on_start_button_click(self):
         """Handle the Start button click event."""
