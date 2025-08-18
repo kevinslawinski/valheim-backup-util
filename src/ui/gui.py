@@ -13,7 +13,7 @@ class App(customtkinter.CTk):
         self.radio_var = customtkinter.IntVar(master=self, value=0)
         self.status_text = customtkinter.StringVar(value="Ready")
         self._create_widgets()
-        self._layout_widgets_pack()
+        self._layout_widgets()
         
     def _configure_window(self):
         """Configure the main window."""
@@ -56,37 +56,22 @@ class App(customtkinter.CTk):
             font=("Arial", 16, "bold")
         )
         
-    def _layout_widgets_grid(self):
+    def _layout_widgets(self):
         """Arrange widgets in the application window."""
-        self.radio_download.grid(row=0, column=0, padx=20, pady=(15, 5), ipady=10, sticky="we")
-        self.radio_upload.grid(row=1, column=0, padx=20, pady=(5, 15), ipady=10, sticky="we")
-        self.button_start.grid(row=2, column=1, padx=20, pady=15, ipady=10, sticky="w")
-        self.frame_config.grid(row=0, column=2, rowspan=4, padx=10, pady=10, sticky="nse")
-        self.frame_status.grid(row=3, column=0, columnspan=2, padx=10, pady=(5, 10), sticky="nswe")
-        self.label_status.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        
-    def _layout_widgets_pack(self):
-        """Arrange widgets in the application window."""
-        # Pack the parent frame to hold the top two frames (actions and config)
+        # Pack frames
         self.frame_top.pack(side="top", fill="both", expand=True, padx=10, pady=(10, 5))
-
-        # Pack the actions frame (top left) inside the top parent frame
         self.frame_actions.pack(in_=self.frame_top, side="left", fill="both", padx=(0, 5))
-
-        # Pack the config frame (top right) inside the top parent frame
         self.frame_config.pack(in_=self.frame_top, side="right", fill="both", expand=True, padx=(5, 0))
-
-        # Pack the status frame (bottom) to span the entire width of the window
         self.frame_status.pack(side="bottom", fill="both", expand=True, padx=10, pady=(5, 10))
         
-        # Pack actions frame widgets
+        # Pack action widgets for frame_actions
         self.radio_download.pack(padx=20, pady=(15, 5), fill="x")
         self.radio_upload.pack(padx=20, pady=(5, 15), fill="x")
-        self.button_start.pack(padx=20, pady=15)
+        self.button_start.pack(padx=20, pady=15, anchor="s")
 
-        # Pack status frame widgets
-        self.label_status.pack(padx=10, pady=10, anchor="w")
-        self.label_config.pack(padx=10, pady=10, anchor="n")
+        # Pack labels
+        self.label_status.pack(padx=10, pady=10, anchor="w") # Status label
+        self.label_config.pack(padx=10, pady=10, anchor="n") # Configuration label
     
     def on_start_button_click(self):
         """Handle the Start button click event."""
