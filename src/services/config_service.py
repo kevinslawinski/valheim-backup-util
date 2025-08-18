@@ -20,6 +20,7 @@ class ConfigService:
         try:
             with open(cls.USER_CONFIG, 'w', encoding='utf-8') as config_file:
                 json.dump(config, config_file, indent=2, ensure_ascii=False)
+            logging.info("Configuration saved successfully.")
         except PermissionError as e:
             logging.warning("Permission denied when saving config: %s", e)
             raise
