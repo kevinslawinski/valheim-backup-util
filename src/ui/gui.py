@@ -24,10 +24,10 @@ class App(customtkinter.CTk):
 
     def _create_widgets(self):
         """Create all widgets used in the application."""
-        self.frame_top = customtkinter.CTkFrame(self)
-        self.frame_actions = customtkinter.CTkFrame(self)
-        self.frame_config = customtkinter.CTkFrame(self)
-        self.frame_status = customtkinter.CTkFrame(self)
+        self.frame_top = customtkinter.CTkFrame(self, fg_color="transparent")
+        self.frame_actions = customtkinter.CTkFrame(self, border_width=1)
+        self.frame_config = customtkinter.CTkFrame(self, border_width=1)
+        self.frame_status = customtkinter.CTkFrame(self, border_width=1)
         self.radio_download = customtkinter.CTkRadioButton(
             self.frame_actions,
             text="Download (Start of session)",
@@ -56,7 +56,7 @@ class App(customtkinter.CTk):
             font=("Arial", 16, "bold")
         )
         
-    def _layout_widgets(self):
+    def _layout_widgets_grid(self):
         """Arrange widgets in the application window."""
         self.radio_download.grid(row=0, column=0, padx=20, pady=(15, 5), ipady=10, sticky="we")
         self.radio_upload.grid(row=1, column=0, padx=20, pady=(5, 15), ipady=10, sticky="we")
@@ -68,16 +68,16 @@ class App(customtkinter.CTk):
     def _layout_widgets_pack(self):
         """Arrange widgets in the application window."""
         # Pack the parent frame to hold the top two frames (actions and config)
-        self.frame_top.pack(side="top", fill="both", expand=True)
+        self.frame_top.pack(side="top", fill="both", expand=True, padx=10, pady=(10, 5))
 
         # Pack the actions frame (top left) inside the top parent frame
-        self.frame_actions.pack(in_=self.frame_top, side="left", fill="both", padx=10, pady=10)
+        self.frame_actions.pack(in_=self.frame_top, side="left", fill="both", padx=(0, 5))
 
         # Pack the config frame (top right) inside the top parent frame
-        self.frame_config.pack(in_=self.frame_top, side="right", fill="both", expand=True, padx=10, pady=10)
+        self.frame_config.pack(in_=self.frame_top, side="right", fill="both", expand=True, padx=(5, 0))
 
         # Pack the status frame (bottom) to span the entire width of the window
-        self.frame_status.pack(side="bottom", fill="both", expand=True, padx=10, pady=10)
+        self.frame_status.pack(side="bottom", fill="both", expand=True, padx=10, pady=(5, 10))
         
         # Pack actions frame widgets
         self.radio_download.pack(padx=20, pady=(15, 5), fill="x")
